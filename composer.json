@@ -5,8 +5,7 @@
   "keywords": [
     "private message",
     "message",
-    "yii2",
-    "php"
+    "yii2"
   ],
   "homepage": "https://github.com/blueeon/simple-message-yii2",
   "authors": [{
@@ -15,10 +14,12 @@
     "role": "Developer"
   }],
   "require": {
-    "php": ">=5.4.0"
+    "yiisoft/yii2": "^2.0.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^5.7"
+    "codeception/base": "^2.2.3",
+    "codeception/verify": "~0.3.1",
+    "codeception/specify": "~0.4.3"
   },
   "autoload": {
     "psr-4": {
@@ -26,8 +27,6 @@
     }
   },
   "autoload-dev": {
-    "psr-4": {
-      "blueeon\\MessageTest\\": "tests/"
-    }
+    "psr-4": {}
   }
 }
