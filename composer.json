@@ -1,0 +1,35 @@
+{
+  "name": "blueeon/simple-message-yii2",
+  "description": "A simple private message module for yii2, only contain model and API, no web interface.",
+  "license": "MIT",
+  "keywords": [
+    "private message",
+    "message",
+    "yii2",
+    "php"
+  ],
+  "version": "0.1.0-beta",
+  "homepage": "https://github.com/blueeon/simple-message-yii2",
+  "authors": [{
+    "name": "blueeon",
+    "email": "blueeon@blueeon.net",
+    "role": "Developer"
+  }],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "require-dev": {
+    "php": ">=5.4.0",
+    "phpunit/phpunit": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "blueeon\\Message\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "blueeon\\MessageTest\\": "tests/"
+    }
+  }
+}
