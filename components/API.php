@@ -6,7 +6,7 @@
  * fileName :   API.php
  */
 
-namespace blueeon\Message\component;
+namespace blueeon\Message\components;
 
 use blueeon\Message\components\SingletonInstance;
 

@@ -7,7 +7,7 @@
 
 namespace blueeon\Message\controllers;
 
-use blueeon\Message\component\API;
+use blueeon\Message\components\API;
 use yii\web\Controller;
 
 class DefaultController extends Controller
