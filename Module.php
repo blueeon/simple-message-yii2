@@ -1,7 +1,7 @@
 <?php
 /**
- * author:      YangKe <yangke@xiaomi.com>
- * createTIme:  20180403 16:08
+ * author:      blueeon <blueeon@blueeon.net>
+ * createTime:  20180403 16:08
  * fileName :   Module.php
  */
 
