@@ -23,7 +23,7 @@
   },
   "autoload": {
     "psr-4": {
-      "blueeon\\Message\\": "src/"
+      "blueeon\\Message\\": ""
     }
   },
   "autoload-dev": {
