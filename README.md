@@ -1,5 +1,5 @@
 # simple-message-yii2
-A simple private message module for yii2, only contain model and API, no web interface.
+A simple private message extension for yii2, only contain model and API, no web interface.
 
 
 Installation
@@ -21,6 +21,25 @@ or add
 
 to the require section of your `composer.json` file.
 
+Configuration
+-----
+To use this extension, simply add the following code in your application configuration:
+```php
+return [
+    //....
+    'components' => [
+        'message' => [
+            'class' => 'blueeon\Message\Message',
+            'db' => 'db',
+            'slave' => 'slave_db',
+            //need to complete a function to get user's nickname.
+            'getUserName' => function($userId, $cacheTime=3600){
+                //...
+            }
+        ],
+    ],
+];
+```
 
 Usage
 -----
@@ -28,4 +47,18 @@ Usage
 Once the extension is installed, simply use it in your code by :
 
 ```php
-<?= \blueeon\Message\AutoloadExample::widget(); ?>```
+//send a new private message to one user.
+$res = Yii::$app->message->send($userId = 12,$message = 'How are u?');
+
+//replay a message.
+$res = Yii::$app->message->reply($messageId = 2100,$message = 'Fine, and u?');
+
+//list all of messages.
+$res = Yii::$app->message->messageList($userId = 12, $page = 1, $pageNum = 30);
+
+//delete a message
+$res = Yii::$app->message->del($messageId = 2100);
+
+
+
+```

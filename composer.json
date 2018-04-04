@@ -1,5 +1,6 @@
 {
   "name": "blueeon/simple-message-yii2",
+  "type": "yii2-extension",
   "description": "A simple private message module for yii2, only contain model and API, no web interface.",
   "license": "MIT",
   "keywords": [
@@ -23,7 +24,7 @@
   },
   "autoload": {
     "psr-4": {
-      "blueeon\\Message\\": ""
+      "blueeon\\Message\\": "./src"
     }
   },
   "autoload-dev": {
