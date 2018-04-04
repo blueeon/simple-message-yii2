@@ -10,7 +10,7 @@ namespace blueeon\Message\components;
  * Class ULog    封装一些日志输入输出的方法
  *
  * @package common\components
- * @author  YangKe <yangke@xiaomi.com>
+ * @author  blueeon <blueeon@blueeon.net>
  */
 class ULog
 {

@@ -12,7 +12,7 @@ use yii\base\Exception;
  * Class SingletonInstance    简单单例class基类
  *
  * @package common\components
- * @author  YangKe <yangke@xiaomi.com>
+ * @author  blueeon <blueeon@blueeon.net>
  */
 abstract class SingletonInstance
 {
