@@ -37,7 +37,6 @@ class API extends SingletonInstance
 
             $return = [
                 'header' => [
-                    'code'   => $code,
                     'status' => $status,
                 ],
                 'data'   => $data,
