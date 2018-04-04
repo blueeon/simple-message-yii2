@@ -27,4 +27,5 @@ phpunit.phar
 #composer
 vendor
 composer.lock
-.git
+tests/_output/*
+tests/_support/_generated
