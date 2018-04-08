@@ -32,7 +32,11 @@ class Message extends Component
      *               Will call it in loop.
      *
      */
-    public $getUserName;
+    public static $getUserName;
+    /**
+     * @var int username cache time
+     */
+    public $userNameCacheTime = 60 * 10;
 
     public function init()
     {
@@ -41,5 +45,18 @@ class Message extends Component
             $this->slave = $this->db;
         }
         // custom initialization code goes here
+    }
+
+    /**
+     * send a message to on user
+     *
+     * @param int    $userId
+     * @param string $message
+     * @return bool
+     */
+    public function send($userId, $message)
+    {
+        return $this->getUserName(12);
+//        return TRUE;
     }
 }
