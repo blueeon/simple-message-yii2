@@ -32,7 +32,7 @@ class Message extends Component
      *               Will call it in loop.
      *
      */
-    public static $getUserName;
+    public $getUserName;
     /**
      * @var int username cache time
      */
@@ -48,15 +48,58 @@ class Message extends Component
     }
 
     /**
-     * send a message to on user
+     * send a message to one user
      *
-     * @param int    $userId
-     * @param string $message
+     * @param int        $userId  接收者用户ID
+     * @param string     $message 消息
+     * @param null|array $from    发送者ID,默认当前用户
      * @return bool
      */
-    public function send($userId, $message)
+    public function send($userId, $message, $from = null)
     {
-        return $this->getUserName(12);
-//        return TRUE;
+        if (!isset(\Yii::$app->user) && is_null($from)) {
+
+            throw new \Exception('Param $from is needed.');
+        } elseif (isset(\Yii::$app->user)) {
+            $from = \Yii::$app->user->id;
+        }
+
+        return true;
+    }
+
+    /**
+     * Reply a message.
+     *
+     * @param int    $messageId 消息ID
+     * @param string $message   消息
+     * @return bool
+     */
+    public function reply($messageId, $message)
+    {
+        return true;
+    }
+
+    /**
+     * 获取某个用户的私信列表,按对话返回,且返回最新的一条回复
+     *
+     * @param int $userId
+     * @param int $page
+     * @param int $pageNum
+     * @return array
+     */
+    public function messageList($userId, $page = 1, $pageNum = 30)
+    {
+        return [];
+    }
+
+    /**
+     * 删除一条消息
+     *
+     * @param int $messageId
+     * @return bool
+     */
+    public function del($messageId)
+    {
+        return true;
     }
 }

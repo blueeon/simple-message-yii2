@@ -10,9 +10,9 @@ class MessageTest extends \Codeception\Test\Unit
     protected function _before()
     {
         $this->obj = Yii::createObject([
-            'class'       => \blueeon\Message\Message::className(),
-            'db'          => 'db',
-            'slave'       => 'slave_db',
+            'class' => \blueeon\Message\Message::className(),
+            'db'    => 'db',
+            'slave' => 'slave_db',
             //need to complete a function to get user's nickname.
 //            'getUserName' => function ($userId) {
 //                return $userId;
@@ -27,23 +27,26 @@ class MessageTest extends \Codeception\Test\Unit
     // testsCreate
     public function testCreateComponent()
     {
-//        $obj    = Yii::createObject([
-//            'class'       => \blueeon\Message\Message::className(),
-//            'db'          => 'db',
-//            //need to complete a function to get user's nickname.
-//            'getUserName' => function ($userId, $cacheTime = 3600) {
-//                return $userId;
-//            }
-//        ]);
-//        $userId = rand(1, 100);
-//        $this->assertEquals($obj->getUserName($userId), $userId);
+        $obj    = Yii::createObject([
+            'class'       => \blueeon\Message\Message::className(),
+            'db'          => 'db',
+            //need to complete a function to get user's nickname.
+            'getUserName' => function ($userId, $cacheTime = 3600) {
+                return $userId;
+            }
+        ]);
+        $userId = rand(1, 100);
+        $this->assertEquals(call_user_func($obj->getUserName, $userId), $userId);
     }
 
     // tests
     public function testSend()
     {
-        codecept_debug($this->obj->getUserName());
-//        $this->assertTrue($this->obj->send(1, 22));
+        $this->assertTrue($this->obj->send(1, 'How are u?', 2));
+    }
 
+    public function testReply()
+    {
+        $this->assertTrue($this->obj->reply(12, 'Fine thx,and u?'));
     }
 }
