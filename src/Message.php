@@ -8,6 +8,7 @@
 namespace blueeon\Message;
 
 use yii\base\Component;
+use yii\db\Exception;
 
 /**
  * Class Message message create a application component to manage private message
@@ -50,21 +51,31 @@ class Message extends Component
     /**
      * send a message to one user
      *
-     * @param            int      @param      $toUserId  接收者用户ID
-     * @param string     $message 消息
-     * @param null|array $from    发送者ID,默认当前用户
-     * @return bool
+     * @param int    $toUid   接收者用户ID
+     * @param string $message 消息
+     * @param null   $fromUid 发送者ID,默认当前用户
+     * @return array
+     * @throws Exception
+     * @throws \Exception
      */
     public function send($toUid, $message, $fromUid = null)
     {
-        if (!isset(\Yii::$app->user) && is_null($from)) {
+        if (!isset(\Yii::$app->user) && is_null($fromUid)) {
 
             throw new \Exception('Param $from is needed.');
         } elseif (isset(\Yii::$app->user)) {
-            $from = \Yii::$app->user->id;
+            $fromUid = \Yii::$app->user->id;
         }
-
-        return true;
+        $model               = new \blueeon\Message\models\Message();
+        $model->from         = $fromUid;
+        $model->to           = $toUid;
+        $model->message      = $message;
+        $model->reply_id     = 0;
+        $model->created_time = date('Y-m-d H:i:s');
+        if (!$model->save()) {
+            throw new Exception('Save failed.', $model->getErrors(), 500);
+        }
+        return $model->attributes;
     }
 
     /**
@@ -72,11 +83,26 @@ class Message extends Component
      *
      * @param int    $messageId 消息ID
      * @param string $message   消息
-     * @return bool
+     * @throws Exception
+     * @throws \Exception
      */
     public function reply($messageId, $message)
     {
-        return true;
+
+        $messageModel = \blueeon\Message\models\Message::findOne($messageId);
+        if (empty($message)) {
+            throw new \Exception('Can not find this message', 500);
+        }
+        $model               = new \blueeon\Message\models\Message();
+        $model->from         = $messageModel->to;
+        $model->to           = $messageModel->from;
+        $model->message      = $message;
+        $model->reply_id     = $messageId;
+        $model->created_time = date('Y-m-d H:i:s');
+        if (!$model->save()) {
+            throw new Exception('Save failed.', $model->getErrors(), 500);
+        }
+        return $model->attributes;
     }
 
     /**
@@ -89,6 +115,16 @@ class Message extends Component
      */
     public function messageList($userId, $page = 1, $pageNum = 30)
     {
+
+        $sql = <<<EOF
+SELECT from, reply_id, to, status, message, create_time
+FROM {{%message}}
+WHERE to = :to_uid
+UNION
+SELECT from, reply_id, to, status, message, create_time
+FROM {{%message}}
+WHERE from = :to_uid
+EOF;
         return [];
     }
 
