@@ -50,12 +50,12 @@ class Message extends Component
     /**
      * send a message to one user
      *
-     * @param int        $userId  接收者用户ID
+     * @param            int      @param      $toUserId  接收者用户ID
      * @param string     $message 消息
      * @param null|array $from    发送者ID,默认当前用户
      * @return bool
      */
-    public function send($userId, $message, $from = null)
+    public function send($toUid, $message, $fromUid = null)
     {
         if (!isset(\Yii::$app->user) && is_null($from)) {
 

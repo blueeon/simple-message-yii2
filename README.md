@@ -23,7 +23,7 @@ to the require section of your `composer.json` file.
 
 Configuration
 -----
-To use this extension, simply add the following code in your application configuration:
+To use this extension, simply add the following code in your application configuration: 
 ```php
 return [
     //....
