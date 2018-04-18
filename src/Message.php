@@ -23,17 +23,20 @@ class Message extends Component
      *
      */
     public $db;
+
     /**
      * @var null|\yii\db\Connection slave DB connection, default to use $db
      *
      */
     public $slave = null;
+
     /**
      * @var function A anonymous method which is use to get user's nickname
      *               Will call it in loop.
      *
      */
     public $getUserName;
+
     /**
      * @var int username cache time
      */
@@ -66,12 +69,14 @@ class Message extends Component
         } elseif (isset(\Yii::$app->user)) {
             $fromUid = \Yii::$app->user->id;
         }
-        $model               = new \blueeon\Message\models\Message();
-        $model->from         = $fromUid;
-        $model->to           = $toUid;
-        $model->message      = $message;
-        $model->reply_id     = 0;
-        $model->created_time = date('Y-m-d H:i:s');
+        $model                = new \blueeon\Message\models\Message();
+        $model->from          = $fromUid;
+        $model->to            = $toUid;
+        $model->dialogue_hash = \blueeon\Message\models\Message::calHash($fromUid, $toUid);
+        $model->message       = $message;
+        $model->reply_id      = 0;
+        $model->status        = \blueeon\Message\models\Message::$status['NORMAL'];
+        $model->created_time  = date('Y-m-d H:i:s');
         if (!$model->save()) {
             throw new Exception('Save failed.', $model->getErrors(), 500);
         }
@@ -93,14 +98,32 @@ class Message extends Component
         if (empty($message)) {
             throw new \Exception('Can not find this message', 500);
         }
-        $model               = new \blueeon\Message\models\Message();
-        $model->from         = $messageModel->to;
-        $model->to           = $messageModel->from;
-        $model->message      = $message;
-        $model->reply_id     = $messageId;
-        $model->created_time = date('Y-m-d H:i:s');
+        $model                = new \blueeon\Message\models\Message();
+        $model->from          = $messageModel->to;
+        $model->to            = $messageModel->from;
+        $model->dialogue_hash = \blueeon\Message\models\Message::calHash($model->from, $model->to);
+        $model->message       = $message;
+        $model->reply_id      = $messageId;
+        $model->status        = \blueeon\Message\models\Message::$status['NORMAL'];
+        $model->created_time  = date('Y-m-d H:i:s');
         if (!$model->save()) {
             throw new Exception('Save failed.', $model->getErrors(), 500);
+        }
+        return $model->attributes;
+    }
+
+    /**
+     * 返回一条message的attributes
+     *
+     * @param $messageId
+     * @return array
+     * @throws \Exception
+     */
+    public function getMessage($messageId)
+    {
+        $model = \blueeon\Message\models\Message::findOne($messageId);
+        if (empty($model)) {
+            throw new \Exception('Can not find this message', 500);
         }
         return $model->attributes;
     }
@@ -115,17 +138,63 @@ class Message extends Component
      */
     public function messageList($userId, $page = 1, $pageNum = 30)
     {
-
-        $sql = <<<EOF
-SELECT from, reply_id, to, status, message, create_time
-FROM {{%message}}
-WHERE to = :to_uid
-UNION
-SELECT from, reply_id, to, status, message, create_time
-FROM {{%message}}
-WHERE from = :to_uid
+        $return    = [];
+        $countSql  = <<<EOF
+SELECT count(DISTINCT dialogue_hash) as dialogue_amount 
+FROM `message` 
+WHERE `from` = :uid OR `to` = :uid AND status = 0
 EOF;
-        return [];
+        $slave     = $this->slave;
+        $ret       = \Yii::$app->$slave->createCommand($countSql, [
+            ':uid' => $userId,
+        ])->queryOne();
+        $total     = $ret['dialogue_amount'];
+        $totalPage = 1 + (int)($total / $pageNum);
+        $ret       = [];
+        if ($total > 0) {
+
+
+            $sql  = <<<EOF
+SELECT max(id) as id, dialogue_hash,count(1) as message_amount
+FROM `message` 
+WHERE `from` = :uid OR `to` = :uid AND status = 0
+GROUP BY dialogue_hash
+ORDER BY created_time DESC
+LIMIT :limit,:offset
+EOF;
+            $ret  = \Yii::$app->$slave->createCommand($sql, [
+                ':uid'    => $userId,
+                ':limit'  => ($page - 1) * $pageNum,
+                ':offset' => $pageNum,
+            ])->queryAll();
+            $data = [];
+            $ids  = [];
+            foreach ($ret as $item) {
+                $ids[]                        = $item['id'];
+                $data[$item['dialogue_hash']] = $item;
+            }
+            $idStr = implode(',', $ids);
+            $sql   = <<<EOF
+SELECT dialogue_hash, reply_id, `from`, `to`, `message`, `created_time`
+FROM `message`
+WHERE id IN({$idStr})
+EOF;
+            $ret   = \Yii::$app->$slave->createCommand($sql)->queryAll();
+            foreach ($ret as $item) {
+                $data[$item['dialogue_hash']]['last_message'] = $item;
+            }
+
+        }
+        $return = [
+            'header' => [
+                'total'        => $total,
+                'totalPage'    => $totalPage,
+                'current_page' => $page,
+                'page_num'     => $pageNum,
+            ],
+            'data'   => $data,
+        ];
+        return $return;
     }
 
     /**
@@ -136,6 +205,23 @@ EOF;
      */
     public function del($messageId)
     {
-        return true;
+        return \blueeon\Message\models\Message::deleteAll([
+            'id' => $messageId,
+        ]);
+    }
+
+    /**
+     * 删除一组对话
+     *
+     * @param $from
+     * @param $to
+     * @return int
+     */
+    public function delDialogue($from, $to)
+    {
+        $hash = \blueeon\Message\models\Message::calHash($from, $to);
+        return \blueeon\Message\models\Message::deleteAll([
+            'dialogue_hash' => $hash,
+        ]);
     }
 }
