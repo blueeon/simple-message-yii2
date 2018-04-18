@@ -151,10 +151,11 @@ EOF;
         $total     = $ret['dialogue_amount'];
         $totalPage = 1 + (int)($total / $pageNum);
         $ret       = [];
+        $data      = [];
         if ($total > 0) {
 
 
-            $sql  = <<<EOF
+            $sql = <<<EOF
 SELECT max(id) as id, dialogue_hash,count(1) as message_amount
 FROM `message` 
 WHERE `from` = :uid OR `to` = :uid AND status = 0
@@ -162,13 +163,13 @@ GROUP BY dialogue_hash
 ORDER BY created_time DESC
 LIMIT :limit,:offset
 EOF;
-            $ret  = \Yii::$app->$slave->createCommand($sql, [
+            $ret = \Yii::$app->$slave->createCommand($sql, [
                 ':uid'    => $userId,
                 ':limit'  => ($page - 1) * $pageNum,
                 ':offset' => $pageNum,
             ])->queryAll();
-            $data = [];
-            $ids  = [];
+
+            $ids = [];
             foreach ($ret as $item) {
                 $ids[]                        = $item['id'];
                 $data[$item['dialogue_hash']] = $item;
