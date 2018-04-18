@@ -72,3 +72,10 @@ $res = Yii::$app->message->delDialogue($uidFrom,$uidTo);
 
 
 ```
+
+Test
+-----
+
+```
+./vendor/codeception/codeception/codecept run
+```
