@@ -66,6 +66,9 @@ $res = Yii::$app->message->messageList($userId = 12, $page = 1, $pageNum = 30);
 //delete a message
 $res = Yii::$app->message->del($messageId = 2100);
 
+//delete a dialogue
+$res = Yii::$app->message->delDialogue($uidFrom,$uidTo);
+
 
 
 ```

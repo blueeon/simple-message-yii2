@@ -22,7 +22,6 @@ class m180418_071435_message extends Migration
             'message'       => Schema::TYPE_TEXT,
             'created_time'  => Schema::TYPE_TIMESTAMP . ' NULL',
         ], $tableOptions);
-        $this->addPrimaryKey('message-pk', 'message', ['id']);
         $this->createIndex('dialogue_hash', 'message', ['dialogue_hash']);
         $this->createIndex('from-to', 'message', ['from', 'to']);
         $this->createIndex('to', 'message', ['to']);
