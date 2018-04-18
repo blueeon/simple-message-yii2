@@ -21,6 +21,13 @@ or add
 
 to the require section of your `composer.json` file.
 
+Then
+
+```
+ php yii migrate/up --migrationPath=@vendor/blueeon/simple-message-yii2/src/migrations
+
+```
+
 Configuration
 -----
 To use this extension, simply add the following code in your application configuration: 
