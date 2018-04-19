@@ -147,7 +147,7 @@ class Message extends Component
      * @param int $pageNum
      * @return array
      */
-    public function messageList($userId, $page = 0, $pageNum = 30)
+    public function messageList($userId, $page = 1, $pageNum = 30)
     {
         $return    = [];
         $countSql  = <<<EOF
@@ -175,7 +175,7 @@ LIMIT :limit,:offset
 EOF;
             $ret = \Yii::$app->$slave->createCommand($sql, [
                 ':uid'    => $userId,
-                ':limit'  => ($page) * $pageNum,
+                ':limit'  => ($page - 1) * $pageNum,
                 ':offset' => $pageNum,
             ])->queryAll();
 
