@@ -31,7 +31,7 @@ class MessageTest extends \Codeception\Test\Unit
         $obj    = Yii::createObject([
             'class'       => \blueeon\Message\Message::className(),
             'db'          => 'db',
-            'getUserName' => function ($userId, $cacheTime = 3600) {
+            'getUserName' => function ($userId) {
                 return $userId;
             }
         ]);
@@ -105,7 +105,6 @@ class MessageTest extends \Codeception\Test\Unit
 
         $ret = $this->obj->messageList(1);
 
-        codecept_debug($ret);
         $this->assertEquals($ret['header']['total'], 2);
         $this->assertEquals($ret['header']['totalPage'], 1);
         $this->assertEquals(count($ret['data']), 2);
