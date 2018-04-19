@@ -155,7 +155,7 @@ EOF;
         if ($total > 0) {
             //total
             $sql = <<<EOF
-SELECT max(id) as id, dialogue_hash,count(1) as message_amount
+SELECT max(id) as id, dialogue_hash,count(1) as message_amount, IF(`from` = :uid , `to` ,`from`) as talker
 FROM `message` 
 WHERE `from` = :uid OR `to` = :uid AND status < 10
 GROUP BY dialogue_hash
