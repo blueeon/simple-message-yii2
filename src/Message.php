@@ -153,7 +153,7 @@ EOF;
         $ret       = [];
         $data      = [];
         if ($total > 0) {
-
+            //total
             $sql = <<<EOF
 SELECT max(id) as id, dialogue_hash,count(1) as message_amount
 FROM `message` 
@@ -168,21 +168,41 @@ EOF;
                 ':offset' => $pageNum,
             ])->queryAll();
 
-            $ids = [];
+            $ids      = [];
+            $hashList = [];
             foreach ($ret as $item) {
                 $ids[]                        = $item['id'];
+                $hashList[]                   = "'{$item['dialogue_hash']}'";
                 $data[$item['dialogue_hash']] = $item;
             }
-            $idStr = implode(',', $ids);
-            $sql   = <<<EOF
+            $idStr       = implode(',', $ids);
+            $hashListStr = implode(',', $hashList);
+
+            //============
+            //unread
+            $sql = <<<EOF
+SELECT dialogue_hash, count(1) as unread
+FROM `message`
+WHERE dialogue_hash IN({$hashListStr}) AND status = :status
+GROUP BY dialogue_hash
+EOF;
+            $ret = \Yii::$app->$slave->createCommand($sql, [
+                ':status' => \blueeon\Message\models\Message::$status['UNREAD'],
+            ])->queryAll();
+            foreach ($ret as $item) {
+                $data[$item['dialogue_hash']]['unread'] = $item['unread'];
+            }
+            //last message
+            $sql = <<<EOF
 SELECT dialogue_hash, reply_id, `from`, `to`, `message`, `created_time`
 FROM `message`
 WHERE id IN({$idStr})
 EOF;
-            $ret   = \Yii::$app->$slave->createCommand($sql)->queryAll();
+            $ret = \Yii::$app->$slave->createCommand($sql)->queryAll();
             foreach ($ret as $item) {
                 $data[$item['dialogue_hash']]['last_message'] = $item;
             }
+            //===========end
 
         }
         $return = [
