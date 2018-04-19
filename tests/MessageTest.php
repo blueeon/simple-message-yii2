@@ -101,7 +101,7 @@ class MessageTest extends \Codeception\Test\Unit
         $ret2 = $this->obj->reply($ret2['id'], 'Im fine too.');
 
         $ret = $this->obj->messageList(1);
-        
+
         $this->assertEquals($ret['header']['total'], 2);
         $this->assertEquals($ret['header']['totalPage'], 1);
         $this->assertEquals(count($ret['data']), 2);

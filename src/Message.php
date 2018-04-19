@@ -171,9 +171,10 @@ EOF;
             $ids      = [];
             $hashList = [];
             foreach ($ret as $item) {
-                $ids[]                        = $item['id'];
-                $hashList[]                   = "'{$item['dialogue_hash']}'";
-                $data[$item['dialogue_hash']] = $item;
+                $ids[]                                  = $item['id'];
+                $hashList[]                             = "'{$item['dialogue_hash']}'";
+                $data[$item['dialogue_hash']]           = $item;
+                $data[$item['dialogue_hash']]['unread'] = 0;
             }
             $idStr       = implode(',', $ids);
             $hashListStr = implode(',', $hashList);
