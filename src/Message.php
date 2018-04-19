@@ -75,7 +75,7 @@ class Message extends Component
         $model->dialogue_hash = \blueeon\Message\models\Message::calHash($fromUid, $toUid);
         $model->message       = $message;
         $model->reply_id      = 0;
-        $model->status        = \blueeon\Message\models\Message::$status['NORMAL'];
+        $model->status        = \blueeon\Message\models\Message::$status['UNREAD'];
         $model->created_time  = date('Y-m-d H:i:s');
         if (!$model->save()) {
             throw new Exception('Save failed.', $model->getErrors(), 500);
@@ -104,7 +104,7 @@ class Message extends Component
         $model->dialogue_hash = \blueeon\Message\models\Message::calHash($model->from, $model->to);
         $model->message       = $message;
         $model->reply_id      = $messageId;
-        $model->status        = \blueeon\Message\models\Message::$status['NORMAL'];
+        $model->status        = \blueeon\Message\models\Message::$status['UNREAD'];
         $model->created_time  = date('Y-m-d H:i:s');
         if (!$model->save()) {
             throw new Exception('Save failed.', $model->getErrors(), 500);
@@ -142,7 +142,7 @@ class Message extends Component
         $countSql  = <<<EOF
 SELECT count(DISTINCT dialogue_hash) as dialogue_amount 
 FROM `message` 
-WHERE `from` = :uid OR `to` = :uid AND status = 0
+WHERE `from` = :uid OR `to` = :uid AND status < 10
 EOF;
         $slave     = $this->slave;
         $ret       = \Yii::$app->$slave->createCommand($countSql, [
@@ -154,11 +154,10 @@ EOF;
         $data      = [];
         if ($total > 0) {
 
-
             $sql = <<<EOF
 SELECT max(id) as id, dialogue_hash,count(1) as message_amount
 FROM `message` 
-WHERE `from` = :uid OR `to` = :uid AND status = 0
+WHERE `from` = :uid OR `to` = :uid AND status < 10
 GROUP BY dialogue_hash
 ORDER BY created_time DESC
 LIMIT :limit,:offset
@@ -223,6 +222,36 @@ EOF;
         $hash = \blueeon\Message\models\Message::calHash($from, $to);
         return \blueeon\Message\models\Message::deleteAll([
             'dialogue_hash' => $hash,
+        ]);
+    }
+
+    /**
+     * 设置消息已读状态
+     *
+     * @param $messageId
+     * @return int
+     */
+    public function setMessageRead($messageId)
+    {
+        return \blueeon\Message\models\Message::updateAll([
+            'status' => \blueeon\Message\models\Message::$status['READ'],
+        ], 'id = :id', [
+            ':id' => $messageId,
+        ]);
+    }
+
+    /**
+     * 设置对话已读状态
+     *
+     * @param $dialogueHash
+     * @return int
+     */
+    public function setDialogueRead($dialogueHash)
+    {
+        return \blueeon\Message\models\Message::updateAll([
+            'status' => \blueeon\Message\models\Message::$status['READ'],
+        ], 'dialogue_hash = :dialogue_hash', [
+            ':dialogue_hash' => $dialogueHash,
         ]);
     }
 }

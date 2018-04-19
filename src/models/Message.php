@@ -25,7 +25,8 @@ use Yii;
 class Message extends \yii\db\ActiveRecord
 {
     public static $status = [
-        'NORMAL'  => '0',
+        'UNREAD'  => '0',
+        'READ'    => '5',
         'DELETED' => '10',
     ];
 
