@@ -10,8 +10,12 @@ class MessageTest extends \Codeception\Test\Unit
     protected function _before()
     {
         $this->obj = Yii::createObject([
-            'class' => \blueeon\Message\Message::className(),
-            'db'    => 'db',
+            'class'             => \blueeon\Message\Message::className(),
+            'db'                => 'db',
+            'getUserName'       => function ($userId) {
+                return "USER#{$userId}";
+            },
+            'userNameCacheTime' => 5,
         ]);
     }
 
@@ -80,7 +84,6 @@ class MessageTest extends \Codeception\Test\Unit
         $this->assertEquals($message['message'], $msg);
         $this->assertEquals($message['from'], 2);
         $this->assertEquals($message['to'], 1);
-
         $this->obj->del($ret['id']);
     }
 
@@ -102,6 +105,7 @@ class MessageTest extends \Codeception\Test\Unit
 
         $ret = $this->obj->messageList(1);
 
+        codecept_debug($ret);
         $this->assertEquals($ret['header']['total'], 2);
         $this->assertEquals($ret['header']['totalPage'], 1);
         $this->assertEquals(count($ret['data']), 2);

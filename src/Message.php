@@ -29,7 +29,14 @@ class Message extends Component
      *
      */
     public $slave = null;
-
+    /**
+     * @var string cache
+     */
+    public $cache = 'cache';
+    /**
+     * @var string cache prefix
+     */
+    public $cachePrefix = 'blueeon\Message#';
     /**
      * @var function A anonymous method which is use to get user's nickname
      *               Will call it in loop.
@@ -38,7 +45,7 @@ class Message extends Component
     public $getUserName;
 
     /**
-     * @var int username cache time
+     * @var int username cache time, if value equal 0,disable cache
      */
     public $userNameCacheTime = 60 * 10;
 
@@ -121,11 +128,15 @@ class Message extends Component
      */
     public function getMessage($messageId)
     {
+        $ret   = [];
         $model = \blueeon\Message\models\Message::findOne($messageId);
         if (empty($model)) {
             throw new \Exception('Can not find this message', 500);
         }
-        return $model->attributes;
+        $ret              = $model->attributes;
+        $ret['from_name'] = $this->getUserName($model->from);
+        $ret['to_name']   = $this->getUserName($model->to);
+        return $ret;
     }
 
     /**
@@ -171,10 +182,11 @@ EOF;
             $ids      = [];
             $hashList = [];
             foreach ($ret as $item) {
-                $ids[]                                  = $item['id'];
-                $hashList[]                             = "'{$item['dialogue_hash']}'";
-                $data[$item['dialogue_hash']]           = $item;
-                $data[$item['dialogue_hash']]['unread'] = 0;
+                $ids[]                                       = $item['id'];
+                $hashList[]                                  = "'{$item['dialogue_hash']}'";
+                $data[$item['dialogue_hash']]                = $item;
+                $data[$item['dialogue_hash']]['talker_name'] = $this->getUserName($item['talker']);
+                $data[$item['dialogue_hash']]['unread']      = 0;
             }
             $idStr       = implode(',', $ids);
             $hashListStr = implode(',', $hashList);
@@ -201,7 +213,9 @@ WHERE id IN({$idStr})
 EOF;
             $ret = \Yii::$app->$slave->createCommand($sql)->queryAll();
             foreach ($ret as $item) {
-                $data[$item['dialogue_hash']]['last_message'] = $item;
+                $data[$item['dialogue_hash']]['last_message']              = $item;
+                $data[$item['dialogue_hash']]['last_message']['from_name'] = $this->getUserName($item['from']);
+                $data[$item['dialogue_hash']]['last_message']['to_name']   = $this->getUserName($item['to']);
             }
             //===========end
 
@@ -274,5 +288,41 @@ EOF;
         ], 'dialogue_hash = :dialogue_hash', [
             ':dialogue_hash' => $dialogueHash,
         ]);
+    }
+
+    private static $userName = [];
+
+    /**
+     * 返回用户ID对应的名称:先读静态变量,后读cache,再读用户指定函数
+     *
+     * @param int $userId
+     * @return string|int
+     */
+    public function getUserName($userId)
+    {
+        if ($this->userNameCacheTime == 0) {
+            $disableCache = true;
+        } else {
+            $disableCache = false;
+        }
+        $cache      = $this->cache;
+        $cacheKey   = $this->cachePrefix . $userId;
+        $cacheGroup = 'group';
+        if ($disableCache || !isset(self::$userName[$cacheGroup][$userId])) {
+            $cacheName = \Yii::$app->$cache->get($cacheKey);
+            if ($disableCache || empty($cacheName)) {
+
+                if (!is_null($this->getUserName)) {
+                    $name = call_user_func($this->getUserName, $userId);
+                } else {
+                    $name = $userId;
+                }
+                \Yii::$app->$cache->set($cacheKey, $name, $this->userNameCacheTime);
+                self::$userName[$cacheGroup][$userId] = $name;
+            } else {
+                self::$userName[$cacheGroup][$userId] = $cacheName;
+            }
+        }
+        return self::$userName[$cacheGroup][$userId];
     }
 }
