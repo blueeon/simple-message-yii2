@@ -63,10 +63,10 @@ class Message extends Component
      */
     public function send($toUid, $message, $fromUid = null)
     {
-        if (!isset(\Yii::$app->user) && is_null($fromUid)) {
+        if (is_null($fromUid) && !isset(\Yii::$app->user)) {
 
             throw new \Exception('Param $from is needed.');
-        } elseif (isset(\Yii::$app->user)) {
+        } elseif (is_null($fromUid) && isset(\Yii::$app->user)) {
             $fromUid = \Yii::$app->user->id;
         }
         $model                = new \blueeon\Message\models\Message();
