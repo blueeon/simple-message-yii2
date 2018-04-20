@@ -261,11 +261,14 @@ EOF;
         $ret   = \Yii::$app->$slave->createCommand($sql, [
             ':dialogue_hash' => $hash,
         ])->queryAll();
+        $data  = [];
         foreach ($ret as $key => $item) {
-            $ret[$key]['from_name'] = $this->getUserName($item['from']);
-            $ret[$key]['to_name']   = $this->getUserName($item['to']);
+            $item['from_name'] = $this->getUserName($item['from']);
+            $item['to_name']   = $this->getUserName($item['to']);
+            $data[$item['id']] = $item;
         }
-        $lastMessage = end($ret);
+        ksort($data);
+        $lastMessage = end($data);
         $talker      = $userId == $lastMessage['from'] ? $lastMessage['to'] : $lastMessage['from'];
         $return      = [
             'header' => [
@@ -275,7 +278,7 @@ EOF;
                 'talker'        => $talker,
                 'talker_name'   => $this->getUserName($talker),
             ],
-            'data'   => $ret,
+            'data'   => $data,
         ];
 
         return $return;

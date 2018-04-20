@@ -128,7 +128,7 @@ class MessageTest extends \Codeception\Test\Unit
         $ret = $this->obj->dialogueMessageList($ret1['dialogue_hash'], 1);
         $this->assertTrue(!empty($ret['header']['max_id']));
         $this->assertTrue(count($ret['data']) == 3);
-        $this->assertTrue($ret['data'][0]['message'] == $ret1['message']);
+        $this->assertTrue(current($ret['data'])['message'] == $ret1['message']);
 
         $this->obj->delDialogue(1, 2);
     }
