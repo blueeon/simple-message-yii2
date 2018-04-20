@@ -197,7 +197,7 @@ EOF;
 SELECT dialogue_hash, count(1) as unread
 FROM `message`
 WHERE dialogue_hash IN({$hashListStr}) AND status = :status
-AND to  = :uid
+AND `to`  = :uid
 GROUP BY dialogue_hash
 EOF;
             $ret = \Yii::$app->$slave->createCommand($sql, [
