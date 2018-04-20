@@ -233,6 +233,46 @@ EOF;
     }
 
     /**
+     * 获取对话中的消息列表
+     *
+     * @param $hash
+     */
+    public function dialogueMessageList($hash, $maxId = 0, $pageSize = 20)
+    {
+        $return  = [];
+        $sqlPart = '';
+        if ($maxId > 0) {
+            $sqlPart = 'AND id < ' . (int)$maxId;
+        }
+        $sql   = <<<EOF
+SELECT id, reply_id, `from`, `to`, status, message, created_time
+FROM message 
+WHERE dialogue_hash = :dialogue_hash
+AND status < 10
+{$sqlPart}
+ORDER BY id DESC
+LIMIT $pageSize;
+EOF;
+        $slave = $this->slave;
+        $ret   = \Yii::$app->$slave->createCommand($sql, [
+            ':dialogue_hash' => $hash,
+        ])->queryAll();
+        foreach ($ret as $key => $item) {
+            $ret[$key]['from_name'] = $this->getUserName($item['from']);
+            $ret[$key]['to_name']   = $this->getUserName($item['to']);
+        }
+        $return = [
+            'header' => [
+                'max_id'    => empty($ret) ? 0 : end($ret)['id'],
+                'page_size' => $pageSize,
+            ],
+            'data'   => $ret,
+        ];
+
+        return $return;
+    }
+
+    /**
      * 删除一条消息
      *
      * @param int $messageId

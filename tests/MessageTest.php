@@ -116,6 +116,24 @@ class MessageTest extends \Codeception\Test\Unit
     }
 
     /**
+     * Test function dialogueMessageList()
+     */
+    public function testDialogueMessageList()
+    {
+        $this->obj->delDialogue(1, 2);
+        $ret1 = $this->obj->send(1, 'How are u?', 2);
+        $ret1 = $this->obj->reply($ret1['id'], 'Fine,and u?');
+        $ret1 = $this->obj->reply($ret1['id'], 'Im fine too.');
+
+        $ret = $this->obj->dialogueMessageList($ret1['dialogue_hash']);
+        $this->assertTrue(!empty($ret['header']['max_id']));
+        $this->assertTrue(count($ret['data']) == 3);
+        $this->assertTrue($ret['data'][0]['message'] == $ret1['message']);
+
+        $this->obj->delDialogue(1, 2);
+    }
+
+    /**
      * Test function del()
      *
      * @return int
