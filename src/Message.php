@@ -235,9 +235,13 @@ EOF;
     /**
      * 获取对话中的消息列表
      *
-     * @param $hash
+     * @param string $hash     dialogue hash
+     * @param int    $userId   user ID
+     * @param int    $maxId    max id
+     * @param int    $pageSize page size
+     * @return array
      */
-    public function dialogueMessageList($hash, $maxId = 0, $pageSize = 20)
+    public function dialogueMessageList($hash, $userId, $maxId = 0, $pageSize = 20)
     {
         $return  = [];
         $sqlPart = '';
@@ -261,10 +265,15 @@ EOF;
             $ret[$key]['from_name'] = $this->getUserName($item['from']);
             $ret[$key]['to_name']   = $this->getUserName($item['to']);
         }
-        $return = [
+        $lastMessage = end($ret);
+        $talker      = $userId == $lastMessage['from'] ? $lastMessage['to'] : $lastMessage['from'];
+        $return      = [
             'header' => [
-                'max_id'    => empty($ret) ? 0 : end($ret)['id'],
-                'page_size' => $pageSize,
+                'max_id'        => empty($ret) ? 0 : $lastMessage['id'],
+                'page_size'     => $pageSize,
+                'dialogue_hash' => $hash,
+                'talker'        => $talker,
+                'talker_name'   => $this->getUserName($talker),
             ],
             'data'   => $ret,
         ];
